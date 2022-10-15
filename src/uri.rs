@@ -1,16 +1,63 @@
+use std::fmt::{Display, Formatter, self, Write};
+
+#[derive(Debug)]
 pub struct Uri {
     scheme: String,
     hostname: String,
-    port: u16,
-    path: Option<String>,
+    port: Option<u16>,
+    path: String,
     query: Option<String>,
     fragment: Option<String>,
 }
 
-#[derive(Debug)]
+impl Uri {
+    pub fn from_str(input: &str) -> Result<Uri, String> {
+        let mut scanner = Scanner::new(input);
+        let tokens = scanner.tokens();
+        let mut parser = Parser::new(&tokens);
+        match parser.parse() {
+            Ok(uri) => Ok(uri),
+            Err(error) => Err(error),
+        }
+    }
+}
+
+impl Display for Uri {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        f.write_str(&self.scheme)?;
+        f.write_str("://")?;
+        f.write_str(&self.hostname)?;
+        match self.port {
+            Some(p) => f.write_fmt(format_args!(":{}", p))?,
+            None => (),
+        }
+        f.write_str(&self.path)?;
+        match &self.query {
+            Some(q) => f.write_fmt(format_args!("?{}", q))?,
+            None => (),
+        }
+        match &self.fragment {
+            Some(q) => f.write_fmt(format_args!("#{}", q)),
+            None => Ok(()),
+        }
+    }
+}
+
+#[derive(Debug, PartialEq)]
 pub enum Token<'a> {
     Delim(char),
     Part(&'a str),
+    Eof,
+}
+
+impl<'a> Display for Token<'a> {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        match self {
+            Token::Delim(c) => f.write_char(*c),
+            Token::Part(s) => f.write_str(s),
+            Token::Eof => f.write_str("EOF"),
+        }
+    }
 }
 
 pub struct Scanner<'a> {
@@ -26,7 +73,7 @@ impl<'a> Scanner<'a> {
         }
     }
 
-    pub fn tokens(&mut self) -> &Vec<Token>{
+    pub fn tokens(&mut self) -> &[Token]{
         self.scan_tokens();
         &self.tokens
     }
@@ -53,6 +100,7 @@ impl<'a> Scanner<'a> {
                 break;
             }
         }
+        self.add_token(Token::Eof);
     }
 
     fn add_token(&mut self, token: Token<'a>) {
@@ -64,5 +112,124 @@ impl<'a> Scanner<'a> {
             ':'|'/'|'?'|'#' => true,
             _ => false,
         }
+    }
+}
+
+struct Parser<'a> {
+    tokens: &'a [Token<'a>],
+    current: usize,
+}
+
+impl<'a> Parser<'a> {
+    fn new(tokens: &'a [Token<'a>]) -> Self {
+        Parser {
+            tokens,
+            current: 0,
+        }
+    }
+
+    fn parse(&mut self) -> Result<Uri, String> {
+        Ok(Uri {
+            scheme: self.scheme()?,
+            hostname: self.hostname()?,
+            port: self.port(),
+            path: self.path(),
+            query: self.query(),
+            fragment: self.fragment(),
+        })
+    }
+
+    fn scheme(&mut self) -> Result<String, String> {
+        let token = self.advance();
+        let scheme = match token {
+            Token::Part(s) => s.to_string(),
+            _ => return Err("error".to_string()),
+        };
+
+        self.consume(Token::Delim(':'))?;
+        self.consume(Token::Delim('/'))?;
+        self.consume(Token::Delim('/'))?;
+        Ok(scheme.to_string())
+    }
+
+    fn hostname(&mut self) -> Result<String, String> {
+        match self.advance() {
+            Token::Part(hostname) => Ok(hostname.to_string()),
+            Token::Delim(c) => Err(format!("Expected hostname, but was {}", *c)),
+            Token::Eof => Err("Expected hostname but was Eof".to_string()),
+        }
+    }
+
+    fn port(&mut self) -> Option<u16> {
+        match self.consume(Token::Delim(':')) {
+            Ok(()) => {
+                if let Token::Part(p) = self.advance() {
+                    let port:u16 = p.parse().unwrap();
+                    Some(port)
+                } else {
+                    None
+                }
+
+            },
+            Err(_) => None,
+        }
+    }
+
+    fn path(&mut self) -> String {
+        let mut path = String::from('/');
+
+        match self.peek() {
+            Token::Delim('/') => self.advance(),
+            _ => return path,
+        };
+
+        loop {
+            if let Token::Part(p) = self.advance() {
+                path.push_str(p);
+            }
+            match self.peek() {
+                Token::Delim('/') => {
+                    path.push('/');
+                    self.advance();
+                },
+                _ => return path,
+            }
+        }
+    }
+
+    fn query(&mut self) -> Option<String> {
+        Some("query".to_string())
+    }
+
+    fn fragment(&mut self) -> Option<String> {
+        Some("fragment".to_string())
+    }
+
+    fn advance(&mut self) -> &Token {
+        if !self.is_at_end() {
+            self.current += 1;
+        }
+        &self.tokens[self.current - 1]
+    }
+
+    fn consume(&mut self, token: Token) -> Result<(), String> {
+        if self.is_at_end() {
+            return Err("is at end".to_owned());
+        }
+        let current = self.peek();
+        if *current == token {
+            self.advance();
+            Ok(())
+        } else {
+            Err(format!("Expected: {}, but: {}", token, current))
+        }
+    }
+
+    fn peek(&self) -> &Token {
+        &self.tokens[self.current]
+    }
+
+    fn is_at_end(&self) -> bool {
+        *self.peek() == Token::Eof
     }
 }

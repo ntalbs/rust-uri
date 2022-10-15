@@ -1,9 +1,9 @@
 mod uri;
 
-use crate::uri::Scanner;
+use crate::uri::Uri;
 
 fn main() {
-    for token in Scanner::new("https://ntalbs.github.io:8443/hello/world/").tokens() {
-        println!("{:?}", token);
-    };
+    let uri = Uri::from_str("http://ntalbs.github.io:80/hello/world?a=10&b=20#frag").unwrap();
+    println!("{}", &uri);
+    println!("{:?}", &uri);
 }
