@@ -1,4 +1,4 @@
-use std::fmt::{Display, Formatter, self, Write};
+use std::fmt::{self, Display, Formatter, Write};
 
 #[derive(Debug)]
 pub struct Uri {
@@ -73,7 +73,7 @@ impl<'a> Scanner<'a> {
         }
     }
 
-    pub fn tokens(&mut self) -> &[Token]{
+    pub fn tokens(&mut self) -> &[Token] {
         self.scan_tokens();
         &self.tokens
     }
@@ -88,14 +88,14 @@ impl<'a> Scanner<'a> {
             if let Some(ch) = chars.next() {
                 if self.is_delimiter(&ch) {
                     if start < current - 1 {
-                        self.add_token(Token::Part(&self.source[start..current-1]));
+                        self.add_token(Token::Part(&self.source[start..current - 1]));
                     }
                     self.add_token(Token::Delim(ch));
-                    start = current ;
+                    start = current;
                 }
             } else {
                 if start < current - 1 {
-                    self.add_token(Token::Part(&self.source[start..current-1]));
+                    self.add_token(Token::Part(&self.source[start..current - 1]));
                 }
                 break;
             }
@@ -109,7 +109,7 @@ impl<'a> Scanner<'a> {
 
     fn is_delimiter(&mut self, ch: &char) -> bool {
         match ch {
-            ':'|'/'|'?'|'#' => true,
+            ':' | '/' | '?' | '#' => true,
             _ => false,
         }
     }
@@ -122,10 +122,7 @@ struct Parser<'a> {
 
 impl<'a> Parser<'a> {
     fn new(tokens: &'a [Token<'a>]) -> Self {
-        Parser {
-            tokens,
-            current: 0,
-        }
+        Parser { tokens, current: 0 }
     }
 
     fn parse(&mut self) -> Result<Uri, String> {
@@ -164,13 +161,12 @@ impl<'a> Parser<'a> {
         match self.consume(Token::Delim(':')) {
             Ok(()) => {
                 if let Token::Part(p) = self.advance() {
-                    let port:u16 = p.parse().unwrap();
+                    let port: u16 = p.parse().unwrap();
                     Some(port)
                 } else {
                     None
                 }
-
-            },
+            }
             Err(_) => None,
         }
     }
@@ -191,7 +187,7 @@ impl<'a> Parser<'a> {
                 Token::Delim('/') => {
                     path.push('/');
                     self.advance();
-                },
+                }
                 _ => return path,
             }
         }
@@ -263,7 +259,7 @@ fn full() {
             assert_eq!("/path/to", uri.path);
             assert_eq!("q1=10&q2=20", uri.query.unwrap());
             assert_eq!("fragment", uri.fragment.unwrap());
-        },
+        }
         Err(_) => assert!(false),
     }
 }
@@ -279,7 +275,7 @@ fn no_port() {
             assert_eq!("/path/to", uri.path);
             assert_eq!("q1=10&q2=20", uri.query.unwrap());
             assert_eq!("fragment", uri.fragment.unwrap());
-        },
+        }
         Err(_) => assert!(false),
     }
 }
@@ -295,7 +291,7 @@ fn no_path() {
             assert_eq!("/", uri.path);
             assert_eq!("q1=10&q2=20", uri.query.unwrap());
             assert_eq!("fragment", uri.fragment.unwrap());
-        },
+        }
         Err(_) => assert!(false),
     }
 }
@@ -311,7 +307,7 @@ fn no_query() {
             assert_eq!("/path/to", uri.path);
             assert_eq!(None, uri.query);
             assert_eq!("fragment", uri.fragment.unwrap());
-        },
+        }
         Err(_) => assert!(false),
     }
 }
@@ -327,7 +323,7 @@ fn no_fragment() {
             assert_eq!("/path/to", uri.path);
             assert_eq!("q1=10&q2=20", uri.query.unwrap());
             assert_eq!(None, uri.fragment);
-        },
+        }
         Err(_) => assert!(false),
     }
 }
