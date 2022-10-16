@@ -211,7 +211,16 @@ impl<'a> Parser<'a> {
     }
 
     fn fragment(&mut self) -> Option<String> {
-        Some("fragment".to_string())
+        match self.peek() {
+            Token::Delim('#') => self.advance(),
+            _ => return None,
+        };
+
+        if let Token::Part(f) = self.advance() {
+            Some(f.to_string())
+        } else {
+            None
+        }
     }
 
     fn advance(&mut self) -> &Token {
