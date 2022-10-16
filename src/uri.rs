@@ -198,7 +198,16 @@ impl<'a> Parser<'a> {
     }
 
     fn query(&mut self) -> Option<String> {
-        Some("query".to_string())
+        match self.peek() {
+            Token::Delim('?') => self.advance(),
+            _ => return None,
+        };
+
+        if let Token::Part(q) = self.advance() {
+            Some(q.to_string())
+        } else {
+            None
+        }
     }
 
     fn fragment(&mut self) -> Option<String> {
