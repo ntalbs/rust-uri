@@ -14,7 +14,7 @@ impl Uri {
     pub fn from_str(input: &str) -> Result<Uri, String> {
         let mut scanner = Scanner::new(input);
         let tokens = scanner.tokens();
-        let mut parser = Parser::new(&tokens);
+        let mut parser = Parser::new(tokens);
         match parser.parse() {
             Ok(uri) => Ok(uri),
             Err(error) => Err(error),
@@ -27,9 +27,9 @@ impl Display for Uri {
         f.write_str(&self.scheme)?;
         f.write_str("://")?;
         f.write_str(&self.hostname)?;
-        match self.port {
-            Some(p) => f.write_fmt(format_args!(":{}", p))?,
-            None => (),
+
+        if let Some(p) = self.port {
+            f.write_fmt(format_args!(":{}", p))?
         }
         f.write_str(&self.path)?;
         match &self.query {
@@ -43,7 +43,7 @@ impl Display for Uri {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Token<'a> {
     Delim(char),
     Part(&'a str),
@@ -108,10 +108,7 @@ impl<'a> Scanner<'a> {
     }
 
     fn is_delimiter(&mut self, ch: &char) -> bool {
-        match ch {
-            ':' | '/' | '?' | '#' => true,
-            _ => false,
-        }
+        matches!(ch, ':' | '/' | '?' | '#')
     }
 }
 
@@ -146,7 +143,7 @@ impl<'a> Parser<'a> {
         self.consume(Token::Delim(':'))?;
         self.consume(Token::Delim('/'))?;
         self.consume(Token::Delim('/'))?;
-        Ok(scheme.to_string())
+        Ok(scheme)
     }
 
     fn hostname(&mut self) -> Result<String, String> {
