@@ -44,7 +44,7 @@ impl Display for Uri {
 }
 
 #[derive(Debug, PartialEq, Eq)]
-pub enum Token<'a> {
+enum Token<'a> {
     Delim(char),
     Part(&'a str),
     Eof,
@@ -60,20 +60,20 @@ impl<'a> Display for Token<'a> {
     }
 }
 
-pub struct Scanner<'a> {
+struct Scanner<'a> {
     source: &'a str,
     tokens: Vec<Token<'a>>,
 }
 
 impl<'a> Scanner<'a> {
-    pub fn new(input: &'a str) -> Self {
+    fn new(input: &'a str) -> Self {
         Scanner {
             source: input,
             tokens: Vec::new(),
         }
     }
 
-    pub fn tokens(&mut self) -> &[Token] {
+    fn tokens(&mut self) -> &[Token] {
         self.scan_tokens();
         &self.tokens
     }
