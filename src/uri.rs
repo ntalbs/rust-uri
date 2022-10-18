@@ -246,6 +246,21 @@ impl<'a> Parser<'a> {
 }
 
 #[test]
+fn simple() {
+    assert_eq!(
+        Uri::from_str("https://example.com").unwrap(),
+        Uri {
+            scheme: "https".to_string(),
+            hostname: "example.com".to_string(),
+            port: None,
+            path: "/".to_string(),
+            query: None,
+            fragment: None,
+        }
+    );
+}
+
+#[test]
 fn full() {
     assert_eq!(
         Uri::from_str("https://example.com:443/path/to?q1=10&q2=20#fragment").unwrap(),
