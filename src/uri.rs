@@ -1,6 +1,6 @@
 use std::fmt::{self, Display, Formatter, Write};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Uri {
     scheme: String,
     hostname: String,
@@ -247,80 +247,75 @@ impl<'a> Parser<'a> {
 
 #[test]
 fn full() {
-    let uri = Uri::from_str("https://example.com:443/path/to?q1=10&q2=20#fragment");
-    match uri {
-        Ok(uri) => {
-            assert_eq!("https", uri.scheme);
-            assert_eq!("example.com", uri.hostname);
-            assert_eq!(443, uri.port.unwrap());
-            assert_eq!("/path/to", uri.path);
-            assert_eq!("q1=10&q2=20", uri.query.unwrap());
-            assert_eq!("fragment", uri.fragment.unwrap());
+    assert_eq!(
+        Uri::from_str("https://example.com:443/path/to?q1=10&q2=20#fragment").unwrap(),
+        Uri {
+            scheme: "https".to_string(),
+            hostname: "example.com".to_string(),
+            port: Some(443),
+            path: "/path/to".to_string(),
+            query: Some("q1=10&q2=20".to_string()),
+            fragment: Some("fragment".to_string()),
         }
-        Err(_) => assert!(false),
-    }
+    );
 }
 
 #[test]
 fn no_port() {
-    let uri = Uri::from_str("https://example.com/path/to?q1=10&q2=20#fragment");
-    match uri {
-        Ok(uri) => {
-            assert_eq!("https", uri.scheme);
-            assert_eq!("example.com", uri.hostname);
-            assert_eq!(None, uri.port);
-            assert_eq!("/path/to", uri.path);
-            assert_eq!("q1=10&q2=20", uri.query.unwrap());
-            assert_eq!("fragment", uri.fragment.unwrap());
+    assert_eq!(
+        Uri::from_str("https://example.com/path/to?q1=10&q2=20#fragment").unwrap(),
+        Uri {
+            scheme: "https".to_string(),
+            hostname: "example.com".to_string(),
+            port: None,
+            path: "/path/to".to_string(),
+            query: Some("q1=10&q2=20".to_string()),
+            fragment: Some("fragment".to_string()),
         }
-        Err(_) => assert!(false),
-    }
+    );
 }
 
 #[test]
 fn no_path() {
-    let uri = Uri::from_str("https://example.com:443?q1=10&q2=20#fragment");
-    match uri {
-        Ok(uri) => {
-            assert_eq!("https", uri.scheme);
-            assert_eq!("example.com", uri.hostname);
-            assert_eq!(443, uri.port.unwrap());
-            assert_eq!("/", uri.path);
-            assert_eq!("q1=10&q2=20", uri.query.unwrap());
-            assert_eq!("fragment", uri.fragment.unwrap());
+    assert_eq!(
+        Uri::from_str("https://example.com:443?q1=10&q2=20#fragment").unwrap(),
+        Uri {
+            scheme: "https".to_string(),
+            hostname: "example.com".to_string(),
+            port: Some(443),
+            path: "/".to_string(),
+            query: Some("q1=10&q2=20".to_string()),
+            fragment: Some("fragment".to_string()),
         }
-        Err(_) => assert!(false),
-    }
+    );
 }
 
 #[test]
 fn no_query() {
-    let uri = Uri::from_str("https://example.com:443/path/to#fragment");
-    match uri {
-        Ok(uri) => {
-            assert_eq!("https", uri.scheme);
-            assert_eq!("example.com", uri.hostname);
-            assert_eq!(443, uri.port.unwrap());
-            assert_eq!("/path/to", uri.path);
-            assert_eq!(None, uri.query);
-            assert_eq!("fragment", uri.fragment.unwrap());
+    assert_eq!(
+        Uri::from_str("https://example.com:443/path/to#fragment").unwrap(),
+        Uri {
+            scheme: "https".to_string(),
+            hostname: "example.com".to_string(),
+            port: Some(443),
+            path: "/path/to".to_string(),
+            query: None,
+            fragment: Some("fragment".to_string()),
         }
-        Err(_) => assert!(false),
-    }
+    );
 }
 
 #[test]
 fn no_fragment() {
-    let uri = Uri::from_str("https://example.com:443/path/to?q1=10&q2=20");
-    match uri {
-        Ok(uri) => {
-            assert_eq!("https", uri.scheme);
-            assert_eq!("example.com", uri.hostname);
-            assert_eq!(443, uri.port.unwrap());
-            assert_eq!("/path/to", uri.path);
-            assert_eq!("q1=10&q2=20", uri.query.unwrap());
-            assert_eq!(None, uri.fragment);
+    assert_eq!(
+        Uri::from_str("https://example.com:443/path/to?q1=10&q2=20").unwrap(),
+        Uri {
+            scheme: "https".to_string(),
+            hostname: "example.com".to_string(),
+            port: Some(443),
+            path: "/path/to".to_string(),
+            query: Some("q1=10&q2=20".to_string()),
+            fragment: None,
         }
-        Err(_) => assert!(false),
-    }
+    );
 }
