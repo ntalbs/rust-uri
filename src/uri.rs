@@ -137,7 +137,7 @@ impl<'a> Parser<'a> {
         let token = self.advance();
         let scheme = match token {
             Token::Part(s) => s.to_string(),
-            _ => return Err("error".to_string()),
+            _ => return Err("Scheme not found".to_string()),
         };
 
         self.consume(Token::Delim(':'))?;
@@ -333,4 +333,20 @@ fn no_fragment() {
             fragment: None,
         }
     );
+}
+
+#[test]
+fn no_scheme() {
+    match Uri::from_str("///example.com:443/path/to?q1=10&q2=20") {
+        Ok(_) => panic!("expect error, but was ok"),
+        Err(e) => assert_eq!("Scheme not found", e),
+    }
+}
+
+#[test]
+fn invalid_delimeters_after_scheme() {
+    match Uri::from_str("https:///example.com:443/path/to?q1=10&q2=20") {
+        Ok(_) => panic!("expect error, but was ok"),
+        Err(e) => assert_eq!("Expected hostname, but was /", e),
+    }
 }
