@@ -2,12 +2,12 @@ use std::fmt::{self, Display, Formatter, Write};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Uri {
-    scheme: String,
-    hostname: String,
-    port: Option<u16>,
-    path: String,
-    query: Option<String>,
-    fragment: Option<String>,
+    pub scheme: String,
+    pub hostname: String,
+    pub port: Option<u16>,
+    pub path: String,
+    pub query: Option<String>,
+    pub fragment: Option<String>,
 }
 
 impl Uri {
