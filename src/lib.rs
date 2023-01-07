@@ -1,5 +1,12 @@
 use std::fmt::{self, Display, Formatter, Write};
 
+/// ```notrust
+/// abc://username:password@example.com:123/path/data?key1=value1&key2=value2#frag1
+/// |-|   |---------------| |---------| |-||--------| |---------------------| |---|
+///  |          userinfo        host    port   path              |              |
+///  |    |-----------------------------------------|            |              |
+/// scheme                  authority                          query         fragment
+/// ```
 #[derive(Debug, PartialEq, Eq)]
 pub struct Uri {
     pub scheme: String,
