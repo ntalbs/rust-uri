@@ -1,4 +1,5 @@
 use std::fmt::{self, Display, Formatter, Write};
+use std::str::FromStr;
 
 /// ```notrust
 /// abc://username:password@example.com:123/path/data?key1=value1&key2=value2#frag1
@@ -17,8 +18,10 @@ pub struct Uri {
     pub fragment: Option<String>,
 }
 
-impl Uri {
-    pub fn from_str(input: &str) -> Result<Uri, String> {
+impl FromStr for Uri {
+    type Err = String;
+
+    fn from_str(input: &str) -> Result<Self, Self::Err> {
         let mut scanner = Scanner::new(input);
         let tokens = scanner.tokens();
         let mut parser = Parser::new(tokens);
