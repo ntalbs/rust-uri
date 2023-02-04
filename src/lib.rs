@@ -36,15 +36,15 @@ impl Display for Uri {
         f.write_str(&self.hostname)?;
 
         if let Some(p) = self.port {
-            f.write_fmt(format_args!(":{}", p))?
+            f.write_fmt(format_args!(":{p}"))?
         }
         f.write_str(&self.path)?;
         match &self.query {
-            Some(q) => f.write_fmt(format_args!("?{}", q))?,
+            Some(q) => f.write_fmt(format_args!("?{q}"))?,
             None => (),
         }
         match &self.fragment {
-            Some(q) => f.write_fmt(format_args!("#{}", q)),
+            Some(q) => f.write_fmt(format_args!("#{q}")),
             None => Ok(()),
         }
     }
@@ -239,7 +239,7 @@ impl<'a> Parser<'a> {
             self.advance();
             Ok(())
         } else {
-            Err(format!("Expected: {}, but: {}", token, current))
+            Err(format!("Expected: {token}, but: {current}"))
         }
     }
 
