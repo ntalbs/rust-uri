@@ -1,7 +1,8 @@
 mod parser;
 mod scanner;
+mod token;
 
-use std::fmt::{self, Display, Formatter, Write};
+use std::fmt::{self, Display, Formatter};
 use std::str::FromStr;
 
 use parser::Parser;
@@ -55,23 +56,6 @@ impl Display for Uri {
         match &self.fragment {
             Some(q) => f.write_fmt(format_args!("#{q}")),
             None => Ok(()),
-        }
-    }
-}
-
-#[derive(Debug, PartialEq, Eq)]
-enum Token<'a> {
-    Delim(char),
-    Part(&'a str),
-    Eof,
-}
-
-impl<'a> Display for Token<'a> {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        match self {
-            Token::Delim(c) => f.write_char(*c),
-            Token::Part(s) => f.write_str(s),
-            Token::Eof => f.write_str("EOF"),
         }
     }
 }

@@ -1,4 +1,4 @@
-use crate::{Token, Uri};
+use crate::{token::Token, Uri};
 
 pub(crate) struct Parser<'a> {
     tokens: &'a [Token<'a>],

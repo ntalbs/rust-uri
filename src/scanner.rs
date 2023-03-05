@@ -1,4 +1,4 @@
-use crate::Token;
+use crate::token::Token;
 
 pub(crate) struct Scanner<'a> {
     source: &'a str,
