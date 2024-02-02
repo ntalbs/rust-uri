@@ -1,4 +1,4 @@
-use std::fmt::{Display, Formatter, self, Write};
+use std::fmt::{self, Display, Formatter, Write};
 
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) enum Token<'a> {

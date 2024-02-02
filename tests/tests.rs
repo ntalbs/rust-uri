@@ -1,5 +1,5 @@
-use std::str::FromStr;
 use rust_uri::Uri;
+use std::str::FromStr;
 
 #[test]
 fn simple() {
