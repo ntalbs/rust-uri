@@ -48,14 +48,16 @@ impl Display for Uri {
         if let Some(p) = self.port {
             f.write_fmt(format_args!(":{p}"))?
         }
+
         f.write_str(&self.path)?;
-        match &self.query {
-            Some(q) => f.write_fmt(format_args!("?{q}"))?,
-            None => (),
+
+        if let Some(q) = &self.query {
+            f.write_fmt(format_args!("?{q}"))?;
         }
-        match &self.fragment {
-            Some(q) => f.write_fmt(format_args!("#{q}")),
-            None => Ok(()),
+
+        if let Some(q) = &self.fragment {
+            f.write_fmt(format_args!("#{q}"))?;
         }
+        Ok(())
     }
 }
