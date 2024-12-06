@@ -7,7 +7,7 @@ pub(crate) enum Token<'a> {
     Eof,
 }
 
-impl<'a> Display for Token<'a> {
+impl Display for Token<'_> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
             Token::Delim(c) => f.write_char(*c),
