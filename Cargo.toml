@@ -2,3 +2,6 @@
 name = "rust-uri"
 version = "0.1.0"
 edition = "2021"
+
+[dev-dependencies]
+p-test = "0.1"
