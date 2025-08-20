@@ -2,3 +2,4 @@
 .vscode
 Cargo.lock
 tarpaulin-report.html
+lcov.info
