@@ -104,7 +104,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn advance(&mut self) -> &Token {
+    fn advance(&mut self) -> &Token<'_> {
         if !self.is_at_end() {
             self.current += 1;
         }
@@ -124,7 +124,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn peek(&self) -> &Token {
+    fn peek(&self) -> &Token<'_> {
         &self.tokens[self.current]
     }
 

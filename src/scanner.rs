@@ -13,7 +13,7 @@ impl<'a> Scanner<'a> {
         }
     }
 
-    pub(crate) fn tokens(&mut self) -> &[Token] {
+    pub(crate) fn tokens(&mut self) -> &[Token<'_>] {
         self.scan_tokens();
         &self.tokens
     }
