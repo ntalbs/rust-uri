@@ -49,7 +49,9 @@ impl Display for Uri {
             f.write_fmt(format_args!(":{p}"))?
         }
 
-        f.write_str(&self.path)?;
+        if self.path != "/" {
+            f.write_str(&self.path)?;
+        }
 
         if let Some(q) = &self.query {
             f.write_fmt(format_args!("?{q}"))?;
