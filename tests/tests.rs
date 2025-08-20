@@ -3,8 +3,8 @@ use rust_uri::Uri;
 use std::str::FromStr;
 
 #[p_test(
+    simple,
     (
-        simple,
         "https://example.com",
         Ok(Uri {
             scheme: "https".to_string(),
@@ -15,8 +15,8 @@ use std::str::FromStr;
             fragment: None,
         })
     ),
+    full,
     (
-        full,
         "https://example.com:443/path/to?q1=10&q2=20#fragment",
         Ok(Uri {
             scheme: "https".to_string(),
@@ -27,8 +27,8 @@ use std::str::FromStr;
             fragment: Some("fragment".to_string()),
         })
     ),
+    no_port,
     (
-        no_port,
         "https://example.com/path/to?q1=10&q2=20#fragment",
         Ok(Uri {
             scheme: "https".to_string(),
@@ -39,8 +39,8 @@ use std::str::FromStr;
             fragment: Some("fragment".to_string()),
         })
     ),
+    no_path,
     (
-        no_path,
         "https://example.com:443?q1=10&q2=20#fragment",
         Ok(Uri {
             scheme: "https".to_string(),
@@ -51,8 +51,8 @@ use std::str::FromStr;
             fragment: Some("fragment".to_string()),
         })
     ),
+    no_query,
     (
-        no_query,
         "https://example.com:443/path/to#fragment",
         Ok(Uri {
             scheme: "https".to_string(),
@@ -63,8 +63,8 @@ use std::str::FromStr;
             fragment: Some("fragment".to_string()),
         })
     ),
+    no_fragment,
     (
-        no_fragment,
         "https://example.com:443/path/to?q1=10&q2=20",
         Ok(Uri {
             scheme: "https".to_string(),
@@ -75,17 +75,30 @@ use std::str::FromStr;
             fragment: None,
         })
     ),
+    no_scheme,
     (
-        no_scheme,
         "///example.com:443/path/to?q1=10&q2=20",
         Err("Scheme not found".to_string()),
     ),
+    invalid_delimeters_after_scheme,
     (
-        invalid_delimeters_after_scheme,
         "https:///example.com:443/path/to?q1=10&q2=20",
         Err("Expected hostname, but was /".to_string())
     )
 )]
 fn test_uri(uri: &str, expected: Result<Uri, String>) {
     assert_eq!(Uri::from_str(uri), expected);
+}
+
+#[p_test(
+    ("https://example.com"),
+    ("https://example.com:443/path/to?q1=10&q2=20#fragment"),
+    ("https://example.com/path/to?q1=10&q2=20#fragment"),
+    ("https://example.com:443?q1=10&q2=20#fragment"),
+    ("https://example.com:443/path/to#fragment"),
+    ("https://example.com:443/path/to?q1=10&q2=20"),
+)]
+fn test_uri_display(uri: &str) {
+    let parsed_uri = Uri::from_str(uri).expect("Failed to parse URI");
+    assert_eq!(uri, parsed_uri.to_string());
 }
