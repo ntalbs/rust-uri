@@ -14,7 +14,7 @@ impl<'a> Parser<'a> {
         Ok(Uri {
             scheme: self.scheme()?,
             hostname: self.hostname()?,
-            port: self.port(),
+            port: self.port()?,
             path: self.path(),
             query: self.query(),
             fragment: self.fragment(),
@@ -42,17 +42,18 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn port(&mut self) -> Option<u16> {
-        match self.consume(Token::Delim(':')) {
-            Ok(()) => {
-                if let Token::Part(p) = self.advance() {
-                    let port: u16 = p.parse().unwrap();
-                    Some(port)
-                } else {
-                    None
-                }
-            }
-            Err(_) => None,
+    fn port(&mut self) -> Result<Option<u16>, String> {
+        match self.peek() {
+            Token::Delim(':') => self.advance(),
+            _ => return Ok(None),
+        };
+
+        let token = self.advance();
+        if let Token::Part(p) = token {
+            let port: u16 = p.parse().unwrap();
+            Ok(Some(port))
+        } else {
+            Err(format!("Expected port, but was {}", token))
         }
     }
 
@@ -240,6 +241,11 @@ mod test {
         (
             "https:/",
             Err("Expected: /, but: EOF".to_string()),
+        ),
+        invalid_port,
+        (
+            "https://localhost::3000",
+            Err("Expected port, but was :".to_string())
         ),
     )]
     fn test_uri(uri: &str, expected: Result<Uri, String>) {
