@@ -38,7 +38,7 @@ impl<'a> Parser<'a> {
         match self.advance() {
             Token::Part(hostname) => Ok(hostname.to_string()),
             Token::Delim(c) => Err(format!("Expected hostname, but was {}", *c)),
-            Token::Eof => Err("Expected hostname but was Eof".to_string()),
+            Token::Eof => Err("Expected hostname, but was Eof".to_string()),
         }
     }
 
@@ -107,8 +107,10 @@ impl<'a> Parser<'a> {
     fn advance(&mut self) -> &Token<'_> {
         if !self.is_at_end() {
             self.current += 1;
+            &self.tokens[self.current - 1]
+        } else {
+            &self.tokens[self.current]
         }
-        &self.tokens[self.current - 1]
     }
 
     fn consume(&mut self, token: Token) -> Result<(), String> {

@@ -84,6 +84,11 @@ use std::str::FromStr;
     (
         "https:///example.com:443/path/to?q1=10&q2=20",
         Err("Expected hostname, but was /".to_string())
+    ),
+    no_hostname_but_eof,
+    (
+        "https://",
+        Err("Expected hostname, but was Eof".to_string())
     )
 )]
 fn test_uri(uri: &str, expected: Result<Uri, String>) {

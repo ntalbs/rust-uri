@@ -16,3 +16,19 @@ impl Display for Token<'_> {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use p_test::p_test;
+
+    use crate::token::Token;
+
+    #[p_test(
+        display_token_delim, (Token::Delim(':'), ":"),
+        display_token_part,  (Token::Part("http"), "http"),
+        display_token_eof,   (Token::Eof, "EOF")
+    )]
+    fn test_token_display(token: Token, s: &str) {
+        assert_eq!(token.to_string(), s);
+    }
+}

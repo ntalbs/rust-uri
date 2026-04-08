@@ -51,3 +51,32 @@ impl<'a> Scanner<'a> {
         matches!(ch, ':' | '/' | '?' | '#')
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::{scanner::Scanner, token::Token};
+    use p_test::p_test;
+
+    #[p_test(
+        (
+            "http://localhost:3000/index.html", 
+            &vec![
+                Token::Part("http"),
+                Token::Delim(':'),
+                Token::Delim('/'),
+                Token::Delim('/'),
+                Token::Part("localhost"),
+                Token::Delim(':'),
+                Token::Part("3000"),
+                Token::Delim('/'),
+                Token::Part("index.html"),
+                Token::Eof
+                ]
+        )
+    )]
+    fn test_scanner(url: &str, expected: &[Token]) {
+        let mut scanner = Scanner::new(url);
+        let tokens = scanner.tokens();
+        assert_eq!(tokens, expected);
+    }
+}
