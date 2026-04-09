@@ -69,17 +69,15 @@ impl<'a> Parser<'a> {
         };
 
         loop {
-            if let Token::Part(p) = self.advance() {
-                path.push_str(p);
-            }
             match self.peek() {
-                Token::Delim('/') => {
-                    path.push('/');
-                    self.advance();
-                }
-                _ => return path,
+                Token::Part(str) => path.push_str(str),
+                Token::Delim('?') | Token::Delim('#') => break,
+                Token::Delim(c) => path.push(*c),
+                _ => break,
             }
+            self.advance();
         }
+        path
     }
 
     fn query(&mut self) -> Option<String> {
@@ -265,6 +263,18 @@ mod test {
         (
             "http://localhost:abc",
             Err("Invalid port number".to_string())
+        ),
+        path_with_repeated_slash,
+        (
+            "http://localhost///path",
+            Ok(Uri {
+                scheme: "http".to_string(),
+                hostname: "localhost".to_string(),
+                port: None,
+                path: "///path".to_string(),
+                query: None,
+                fragment: None,
+            })
         ),
         query_str_with_repeated_quation_marks,
         (
