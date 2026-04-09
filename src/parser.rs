@@ -261,7 +261,7 @@ mod test {
             "http://localhost:abc",
             Err("Invalid port number".to_string())
         ),
-        query_str_with_delim1,
+        query_str_with_repeated_quation_marks,
         (
             "http://localhost???a=10",
             Ok(Uri {
