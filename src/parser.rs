@@ -50,8 +50,11 @@ impl<'a> Parser<'a> {
 
         let token = self.advance();
         if let Token::Part(p) = token {
-            let port: u16 = p.parse().unwrap();
-            Ok(Some(port))
+            if let Ok(port) = p.parse::<u16>() {
+                Ok(Some(port))
+            } else {
+                Err("Invalid port number".to_string())
+            }
         } else {
             Err(format!("Expected port, but was {}", token))
         }
@@ -85,11 +88,17 @@ impl<'a> Parser<'a> {
             _ => return None,
         };
 
-        if let Token::Part(q) = self.advance() {
-            Some(q.to_string())
-        } else {
-            None
+        let mut query = String::new();
+        loop {
+            match self.peek() {
+                Token::Part(str) => query.push_str(str),
+                Token::Delim('#') => break,
+                Token::Delim(c) => query.push(*c),
+                _ => break,
+            }
+            self.advance();
         }
+        Some(query)
     }
 
     fn fragment(&mut self) -> Option<String> {
@@ -244,9 +253,27 @@ mod test {
         ),
         invalid_port,
         (
-            "https://localhost::3000",
+            "http://localhost::3000",
             Err("Expected port, but was :".to_string())
         ),
+        invalid_port_number,
+        (
+            "http://localhost:abc",
+            Err("Invalid port number".to_string())
+        ),
+        query_str_with_delim1,
+        (
+            "http://localhost???a=10",
+            Ok(Uri {
+                scheme: "http".to_string(),
+                hostname: "localhost".to_string(),
+                port: None,
+                path: "/".to_string(),
+                query: Some("??a=10".to_string()),
+                fragment: None,
+            })
+
+        )
     )]
     fn test_uri(uri: &str, expected: Result<Uri, String>) {
         assert_eq!(Uri::from_str(uri), expected);
