@@ -9,6 +9,7 @@ use std::str::FromStr;
     ("https://example.com:443?q1=10&q2=20#fragment"),
     ("https://example.com:443/path/to#fragment"),
     ("https://example.com:443/path/to?q1=10&q2=20"),
+    ("https://example.com:443/path/to??q1=10&q2=20##frag"),
 )]
 fn test_uri_display(uri: &str) {
     let parsed_uri = Uri::from_str(uri).expect("Failed to parse URI");
