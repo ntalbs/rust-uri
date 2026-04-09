@@ -107,11 +107,16 @@ impl<'a> Parser<'a> {
             _ => return None,
         };
 
-        if let Token::Part(f) = self.advance() {
-            Some(f.to_string())
-        } else {
-            None
+        let mut fragment = String::new();
+        loop {
+            match self.peek() {
+                Token::Part(str) => fragment.push_str(str),
+                Token::Delim(c) => fragment.push(*c),
+                _ => break,
+            }
+            self.advance();
         }
+        Some(fragment)
     }
 
     fn advance(&mut self) -> &Token<'_> {
@@ -272,8 +277,19 @@ mod test {
                 query: Some("??a=10".to_string()),
                 fragment: None,
             })
-
-        )
+        ),
+        fragment_with_repeated_hash,
+        (
+            "http://localhost/hello####world",
+            Ok(Uri {
+                scheme: "http".to_string(),
+                hostname: "localhost".to_string(),
+                port: None,
+                path: "/hello".to_string(),
+                query: None,
+                fragment: Some("###world".to_string()),
+            })
+        ),
     )]
     fn test_uri(uri: &str, expected: Result<Uri, String>) {
         assert_eq!(Uri::from_str(uri), expected);
